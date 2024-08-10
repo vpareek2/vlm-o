@@ -32,4 +32,44 @@ class PaliGemmaProcessor:
 
         self.tokenizer = tokenizer
 
+    def __call__(self, text: List[str], images: List[Image.Image], padding: str = "longest", trunctation: bool = True) -> dict:
+        assert len(images) == 1 and len(text == 1), f"Recieved {len(images)} images for {len(text)} prompts"
+
+        pixel_values = process_images(
+            images,
+            size = (self.image_size, self.image_size),
+            resample = Image.Resampling.BICUBIC,
+            rescale_factor = 1 / 255.0,
+            image_mean = IMAGENET_STANDARD_MEAN,
+            image_std = IMAGENET_STANDARD_STD,
+        )
+
+        # Convert the list of numpy arrays to a single numpy array with shape [Batch_Size, Channel, Height, Width]
+        pixel_values = np.stack(pixel_values, axis=0)
+        # Convert the numpy array to a PyTorch tensor
+        pixel_values = torch.tensor(pixel_values)
+
+        # Prepend a `self.image_seq_length` number of image tokens to the prompt
+        input_strings = [
+            add_image_tokens_to_prompt(
+                prefix_prompt = prompt,
+                bos_token = self.tokenizer.bos_token,
+                image_seq_len = self.image_seq_length,
+                image_token = self.IMAGE_TOKEN,
+            )
+            for prompt in text
+        ]
+
+        # Returns the input_ids and attention_mask as PyTorch tensors
+        inputs = self.tokenizer(
+            input_strings,
+            return_tensors = "pt",
+            padding = padding,
+            trunctation = trunctation,
+        )
+
+        return_data = {"pixel_values" : pixel_values, **inputs}
+
+        return return_data
+
     
