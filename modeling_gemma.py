@@ -91,6 +91,52 @@ class GemmaRMSNorm(nn.Module):
         return output.type_as(x)
 
 
+class GemmaMLP(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        self.config = config
+        self.hidden_size = config.hidden_size
+        self.intermediate_size = config.intermediate_size
+        self.gate_proj = nn.Linear(self.hidden_size, self.intermediate_size, bias=False)
+        self.up_proj = nn.Linear(self.hidden_size, self.intermediate_size, bias=False)
+        self.down_proj = nn.Linear(self.hidden_size, self.intermediate_size, bias=False)
+
+    def forward(self, x):
+        # Equivalent to:
+        # y = self.gate_proj(x) # [Batch_Size, Seq_Len, Hidden_Size] -> [Batch_Size, Seq_Len, Intermediate_Size]
+        # y = torch.gelu(y, approximate="tanh") # [Batch_Size, Seq_Len, Intermediate_Size]
+        # j = self.up_proj(x) # [Batch_Size, Seq_Len, Hidden_Size] -> [Batch_Size, Seq_Len, Intermediate_Size]
+        # z = y * j # [Batch_Size, Seq_Len, Intermediate_Size]
+        # z = self.down_proj(z) # [Batch_Size, Seq_Len, Intermediate_Size] -> [Batch_Size, Seq_Len, Hidden_Size]
+        return self.down_proj(nn.functional.gelu(self.gate_proj(x), approximate="tanh") * self.up_proj(x))
+
+
+class GemmaAttention(nn.Module):
+
+    def __init__(self, config: GemmaConfig, layer_idx: Optional[int] = None):
+        super().__init__()
+        self.config = config
+        self.layer_idx = layer_idx
+
+        self.attention_dropout = config.attention_dropout
+        self.hidden_size = config.hidden_size
+        self.num_heads = config.num_attention_heads
+        self.head_dim = config.head_dim
+        self.num_key_value_heads = config.num_key_value_heads
+        self.num_key_value_groups = self.num_heads // self.num_key_value_heads
+        self.max_position_embeddings = config.max_position_embeddings
+        self.rope_theta = config.rope_theta
+        self.is_causal = True
+
+        assert self.hidden_size % self.num_heads == 0
+
+        self.q_proj = nn.Linear(self.hidden_size, self.num_heads * self.head_dim, bias=config.attention_bias)
+        self.k_proj = nn.Linear(self.hidden_size, self.num_key_value_heads * self.head_dim, bias=config.attention_bias)
+        self.v_proj = nn.Linear(self.hidden_size, self.num_key_value_heads * self.head_dim, bias=config.attention_bias)
+        self.o_proj = nn.Linear(self.hidden_size * self.head_dim, self.hidden_size, bias=config.attention_bias)
+
+
+
 
 class GemmaDecoderLayer(nn.Module):
 
@@ -116,12 +162,7 @@ class GemmaDecoderLayer(nn.Module):
         hidden_states = self.input_layernorm(hidden_states)
 
         # [Batch_Size, Seq_Len, Hidden_Size]
-        hidden_states, _, = self.self_attn(
-            hidden_states=hidden_states,
-            attention_mask=attention_mask,
-            position_ids=position_ids,
-            kv_cache=kv_cache,
-        )
+        hidden_states, _, = self.self_attn(hidden_states=hidden_states, attention_mask=attention_mask, position_ids=position_ids, kv_cache=kv_cache)
         # [Batch_Size, Seq_Len, Hidden_Size]
         hidden_states = residual + hidden_states
 
@@ -135,8 +176,6 @@ class GemmaDecoderLayer(nn.Module):
         hidden_states = residual + hidden_states
 
         return hidden_states
-
-
 
 
 class GemmaModel(nn.Module):
