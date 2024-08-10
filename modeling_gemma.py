@@ -5,6 +5,34 @@ from torch.nn import CrossEntropyLoss
 import math
 from modeling_siglip import SiglipVisionConfig, SiglipVisionModel
 
+class KVCache():
+
+    def __init__(self) -> None:
+        self.key_cache: List[torch.Tensor] = []
+        self.value_cache: List[torch.Tensor] = []
+
+        def num_items(self) -> int:
+            if len(self.key_cache) == 0:
+                return 0
+            else:
+                # The shape of the key_cache is [Batch_Size, Num_Heads_KV, Seq_Len, Head_Dim
+                return self.key_cache[0].shape[-2]
+
+        def update(self, key_states: torch.Tensor, value_states: torch.Tensor, layer_idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
+            if len(self.key_cache) <= layer_idx:
+                # If we never added anything to the KV-Cache of this layer, let's create it.
+                self.key_cache.append(key_states)
+                self.value_cache.append(value_states)
+            else:
+                # ... otherwise we concatenate the new keys with the existing ones.
+                # each tensor has shape :[Batch_Size, Num_Heads_KV, Seq_Len, Head_Dim]
+                self.key_cache[layer_idx] = torch.cat([self.key_cache[layer_idx], key_states], dim=-2)
+                self.value_cache[layer_idx] = torch.cat([self.key_cache[layer_idx], key_states], dim=-2)
+
+            # ... and then we return all existing keys = the new 
+            return self.key_cache[layer_idx], self.value_cache[layer_idx]    
+
+
 class GemmaConfig():
 
     def __init__(
@@ -134,8 +162,33 @@ class GemmaAttention(nn.Module):
         self.k_proj = nn.Linear(self.hidden_size, self.num_key_value_heads * self.head_dim, bias=config.attention_bias)
         self.v_proj = nn.Linear(self.hidden_size, self.num_key_value_heads * self.head_dim, bias=config.attention_bias)
         self.o_proj = nn.Linear(self.hidden_size * self.head_dim, self.hidden_size, bias=config.attention_bias)
+        self.rotary_emb = GemmaRotaryEmbedding(self.head_dim, max_position_embeddings=self.max_position_embeddings, base=self.rope_theta)
+        
+    def forward(self, hidden_states: torch.Tensor, attention_mask: Optional[torch.Tensor] = None, position_ids: Optional[torch.LongTensor] = None,
+                kv_cache: Optional[KVCache] = None, **kwargs) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple[torch.Tensor]]]:
+        
+        bsz, q_len, _ = hidden_states.size() # [Batch_Size, Seq_Len, Hidden_Size]
+        # [Batch_Size, Seq_Len, Num_Heads_Q * Head_Dim]
+        query_states = self.q_proj(hidden_states)
+        # [Batch_Size, Seq_Len, Num_Heads_KV * Head_Dim]
+        key_states = self.k_proj(hidden_states)
+        # [Batch_Size, Seq_Len, Num_Heads_KV * Head_Dim]
+        value_states = self.v_proj(hidden_states)
+        # [Batch_Size, Num_Heads_Q, Seq_Len, Head_Dim]
+        query_states = query_states.view(bsz, q_len, self.num_heads, self.head_dim).transpose(1, 2)
+        # [Batch_Size, Num_Heads_KV, Seq_Len, Head_Dim]
+        key_states = key_states.view(bsz, q_len, self.num_key_value_heads, self.head_dim).transpose(1, 2)
+        # [Batch_Size, Num_Heads_KV, Seq_Len, Head_Dim]
+        value_states = value_states.view(bsz, q_len, self.num_key_value_heads, self.head_dim).transpose(1, 2)
 
+        # [Batch_Size, Seq_Len, Head_Dim], [Batch_Size, Seq_Len, Head_Dim]
+        cos, sin = self.rotary_emb(value_states, position_ids, seq_len=None)
+        # [Batch_Size, Num_Heads_Q, Seq_Len, Head_Dim], [Batch_Size, Num_Heads_KV, Seq_Len, Head_Dim]
+        query_states, key_states = apply_rotary_pos_emb(query_states, key_states, cos, sin)
 
+        if kv_cache is not None:
+            key_states, value_states = kv_cache.update(key_states, value_states, self.layer_idx)
+        
 
 
 class GemmaDecoderLayer(nn.Module):
