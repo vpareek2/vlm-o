@@ -1,4 +1,6 @@
-# Image encoder: SigLip
+# Vision Model
+# Contrastive Vision Encoder
+# Siglip
 
 from typing import Optional, Tuple
 import torch
