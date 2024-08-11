@@ -195,7 +195,6 @@ def apply_rotary_pos_emb(q, k, cos, sin, unsqueeze_dim=1):
     k_embed = (k * cos) + (rotate_half(k) * sin)
     return q_embed, k_embed
 
-
 class GemmaAttention(nn.Module):
 
     def __init__(self, config: GemmaConfig, layer_idx: Optional[int] = None):
