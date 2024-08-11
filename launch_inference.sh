@@ -9,7 +9,7 @@ TOP_P=0.9
 DO_SAMPLE="False"
 ONLY_CPU="False"
 
-/Library/Frameworks/Python.framework/Versions/3.11/bin/python3 inference.py \
+python3 inference.py \
     --model_path "$MODEL_PATH" \
     --prompt "$PROMPT" \
     --image_file_path "$IMAGE_FILE_PATH" \
