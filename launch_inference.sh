@@ -1,7 +1,7 @@
 #!/bin/bash
 
-MODEL_PATH="../paligemma-3b-pt-224"
-PROMPT="this image shows"
+MODEL_PATH="./paligemma-3b-pt-224"
+PROMPT=""
 IMAGE_FILE_PATH="test_images/image2.jpg"
 MAX_TOKENS_TO_GENERATE=300
 TEMPERATURE=0.8
