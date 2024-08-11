@@ -7,7 +7,7 @@ MAX_TOKENS_TO_GENERATE=300
 TEMPERATURE=0.8
 TOP_P=0.9
 DO_SAMPLE="False"
-ONLY_CPU="True"
+ONLY_CPU="False"
 
 /Library/Frameworks/Python.framework/Versions/3.11/bin/python3 inference.py \
     --model_path "$MODEL_PATH" \
