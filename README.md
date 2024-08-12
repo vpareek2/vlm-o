@@ -1,10 +1,8 @@
 # VLM-o
 
-VLM-o is a multi-modal vision model built for image analysis. This model is 
-inspired by the [PaliGemma](https://arxiv.org/pdf/2407.07726) architecutre.
+VLM-o is a multi-modal vision model built for image analysis and object detection. This model is inspired by the [PaliGemma](https://arxiv.org/pdf/2407.07726) architecutre.
 
-This repository contains an inference implementation and examples, based on the
-[Flax](https://github.com/google/flax) and [JAX](https://github.com/google/jax).
+This repository contains an inference implementation written in [PyTorch](https://pytorch.org) and [CUDA](https://developer.nvidia.com/cuda-toolkit). The weights are used from HuggingFace's [PaliGemma-3b-pt-224](https://huggingface.co/google/paligemma-3b-pt-224) repository and then fine-tuned 
 
 ### Learn more about Gemma
 
