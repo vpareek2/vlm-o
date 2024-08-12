@@ -1,14 +1,11 @@
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 from datasets import load_dataset
-from processing_paligemma import PaliGemmaProcessor
-from modeling_gemma import PaliGemmaForConditionalGeneration, KVCache
-from utils import load_hf_model
+from processor import MultiModalProcessor
+from load_model import load_hf_model
 from transformers import Trainer, TrainingArguments
-from PIL import Image
-import math
 from dataclasses import dataclass, field
-from typing import List, Optional, Union
+from typing import List
 
 @dataclass
 class LoraConfig:
@@ -72,7 +69,7 @@ print(test_ds)
 # Load the model and processor
 model_id = "./paligemma-3b-pt-224"
 model, tokenizer = load_hf_model(model_id, "cuda")
-processor = PaliGemmaProcessor(tokenizer, model.config.vision_config.num_image_tokens, model.config.vision_config.image_size)
+processor = MultiModalProcessor(tokenizer, model.config.vision_config.num_image_tokens, model.config.vision_config.image_size)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = model.to(device)

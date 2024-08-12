@@ -1,3 +1,5 @@
 paligemma-3b-pt-224
 __pycache__
 paligemma_vqav2
+launch_inference.sh
+model_weights
