@@ -6,6 +6,55 @@ from modeling_gemma import PaliGemmaForConditionalGeneration, KVCache
 from utils import load_hf_model
 from transformers import Trainer, TrainingArguments
 from PIL import Image
+import math
+from dataclasses import dataclass, field
+from typing import List, Optional, Union
+
+@dataclass
+class LoraConfig:
+    r: int = 8
+    lora_alpha: int = 16
+    target_modules: List[str] = field(default_factory=lambda: ["q_proj", "v_proj"])
+    lora_dropout: float = 0.05
+    bias: str = "none"
+    task_type: str = "CAUSAL_LM"
+
+    def __post_init__(self):
+        self.inference_mode = False
+        self.r = {}
+        self.lora_alpha = {}
+        self.scaling = {}
+        self.lora_dropout = {}
+        for key in self.target_modules:
+            self.r[key] = self.r
+            self.lora_alpha[key] = self.lora_alpha
+            self.scaling[key] = self.lora_alpha[key] / self.r[key]
+            self.lora_dropout[key] = self.lora_dropout
+
+class LoraLinear(torch.nn.Module):
+    def __init__(self, in_features, out_features, config: LoraConfig):
+        super().__init__()
+        self.linear = torch.nn.Linear(in_features, out_features, bias=False)
+        self.lora_A = torch.nn.Parameter(torch.zeros((config.r, in_features)))
+        self.lora_B = torch.nn.Parameter(torch.zeros((out_features, config.r)))
+        self.scaling = config.scaling
+        self.dropout = torch.nn.Dropout(p=config.lora_dropout)
+
+    def forward(self, x):
+        result = self.linear(x)
+        lora_output = (self.dropout(x) @ self.lora_A.t() @ self.lora_B.t()) * self.scaling
+        return result + lora_output
+
+def apply_lora_to_model(model, config: LoraConfig):
+    for name, module in model.named_modules():
+        if any(target in name for target in config.target_modules):
+            if isinstance(module, torch.nn.Linear):
+                lora_module = LoraLinear(module.in_features, module.out_features, config)
+                lora_module.linear.weight.data = module.weight.data
+                if module.bias is not None:
+                    lora_module.linear.bias = module.bias
+                setattr(model, name, lora_module)
+    return model
 
 # Load the dataset
 ds = load_dataset('HuggingFaceM4/VQAv2', split="train[:10%]")
@@ -27,6 +76,10 @@ processor = PaliGemmaProcessor(tokenizer, model.config.vision_config.num_image_t
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
+
+# Apply LoRA to the model
+lora_config = LoraConfig(r=8, lora_alpha=16, target_modules=["q_proj", "v_proj"], lora_dropout=0.05)
+model = apply_lora_to_model(model, lora_config)
 
 # Define a custom dataset
 class PaliGemmaDataset(Dataset):
@@ -73,7 +126,7 @@ def custom_data_collator(features):
 # Define training arguments
 training_args = TrainingArguments(
     output_dir="./results",
-    num_train_epochs=2,
+    num_train_epochs=3,
     per_device_train_batch_size=4,
     per_device_eval_batch_size=4,
     warmup_steps=500,
@@ -98,4 +151,18 @@ trainer = Trainer(
 trainer.train()
 
 # Save the fine-tuned model
-trainer.save_model("model")
+trainer.save_model("lora_paligemma_vqa")
+
+# Function to save LoRA weights separately
+def save_lora_weights(model, path):
+    lora_state_dict = {}
+    for name, module in model.named_modules():
+        if isinstance(module, LoraLinear):
+            lora_state_dict[f"{name}.lora_A"] = module.lora_A.data
+            lora_state_dict[f"{name}.lora_B"] = module.lora_B.data
+    torch.save(lora_state_dict, path)
+
+# Save LoRA weights
+save_lora_weights(model, "lora_weights.pt")
+
+print("Fine-tuning completed and model saved.")
