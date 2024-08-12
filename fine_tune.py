@@ -98,4 +98,4 @@ trainer = Trainer(
 trainer.train()
 
 # Save the fine-tuned model
-trainer.save_model("fine_tuned_paligemma")
+trainer.save_model("model")
