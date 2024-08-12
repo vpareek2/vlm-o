@@ -1,8 +1,8 @@
 #!/bin/bash
 
-MODEL_PATH="./paligemma-3b-pt-224"
-PROMPT=""
-IMAGE_FILE_PATH="test_images/image2.jpg"
+MODEL_PATH="./paligemma_vqav2"
+PROMPT="What is happening in the photo?"
+IMAGE_FILE_PATH="test_images/image1.jpg"
 MAX_TOKENS_TO_GENERATE=300
 TEMPERATURE=0.8
 TOP_P=0.9
