@@ -16,7 +16,7 @@ https://github.com/vpareek2/vlm-o
 ```
 
 #### Downloading the model
-3. To run inference on this implementation, you need to download the weights from huggingface at https://huggingface.co/google/paligemma-3b-pt-224. I am probably going to upload my fine-tuned weights too, I will update this when I do. Once you are on huggingface, and logged into your account, clone the weights into the same VLM-o repository.
+3. To run inference on this implementation, you need to download the weights from huggingface at https://huggingface.co/google/paligemma-3b-pt-224. I am probably going to upload my fine-tuned weights too, I will update this when I do. If you want them, feel free to reach out, I am not sure how to upload them right now, huggingface is glitching. Once you are on huggingface, and logged into your account, clone the weights into the same VLM-o repository.
 
 4. Make sure to download all libraries using the requirements.txt file.
 
