@@ -1,5 +1,5 @@
-from models.multimodal.multimodal_model import PaliGemmaForConditionalGeneration
-from models.multimodal.multimodal_config import MultiModalConfig
+from model.multimodal.multimodal_model import PaliGemmaForConditionalGeneration
+from model.multimodal.multimodal_config import MultiModalConfig
 from transformers import AutoTokenizer
 import json
 import glob

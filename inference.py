@@ -3,8 +3,8 @@ import torch
 import fire
 
 from processor import MultiModalProcessor
-from models.utils.kv_cache import KVCache
-from models.multimodal.multimodal_model import PaliGemmaForConditionalGeneration
+from model.utils.kv_cache import KVCache
+from model.multimodal.multimodal_model import PaliGemmaForConditionalGeneration
 from load_model import load_hf_model
 
 
