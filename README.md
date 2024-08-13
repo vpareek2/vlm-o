@@ -30,6 +30,14 @@ pip install -r requirements.txt
 ```
 ./run.sh
 ```
+### Demo and GUI use
+If you prefer to use the model with a graphical user interface, I have designed a gradio app. Originally this was supposed to be added to my personal website, but I didn't really want to pay and couldn't get enough vram at any free tier.
+
+All you have to do is first unzip the weights.zip folder, then run:
+```
+python app.py
+```
+Then open the local host link in the browser of your choice. It should look like this:
 
 ## System Requirements
 

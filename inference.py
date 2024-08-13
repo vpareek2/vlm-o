@@ -72,7 +72,8 @@ def test_inference(
     generated_tokens = torch.cat(generated_tokens, dim=-1)
     decoded = processor.tokenizer.decode(generated_tokens, skip_special_tokens=True)
 
-    print(prompt + decoded)
+    # print(prompt + decoded)
+    print(decoded)
 
 
 def _sample_top_p(probs: torch.Tensor, p: float):
@@ -87,6 +88,7 @@ def _sample_top_p(probs: torch.Tensor, p: float):
 
 def main(
     model_path: str = None,
+    tokenizer_path = None,
     prompt: str = None,
     image_file_path: str = None,
     max_tokens_to_generate: int = 100,
@@ -106,7 +108,7 @@ def main(
     print("Device in use: ", device)
 
     print(f"Loading model")
-    model, tokenizer = load_hf_model(model_path, device)
+    model, tokenizer = load_hf_model(model_path, tokenizer_path, device)
     model = model.to(device).eval()
 
     num_image_tokens = model.config.vision_config.num_image_tokens
