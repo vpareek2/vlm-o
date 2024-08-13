@@ -1,125 +1,53 @@
 # VLM-o
 
-VLM-o is a multi-modal vision model built for image analysis and object detection. This model is inspired by the [PaliGemma](https://arxiv.org/pdf/2407.07726) architecutre.
+VLM-o is a 3B parameter multi-modal vision model built for image analysis and object detection. This model is inspired by the [PaliGemma](https://arxiv.org/pdf/2407.07726) architecutre.
 
-This repository contains an inference implementation written in [PyTorch](https://pytorch.org) and [CUDA](https://developer.nvidia.com/cuda-toolkit). The weights are used from HuggingFace's [PaliGemma-3b-pt-224](https://huggingface.co/google/paligemma-3b-pt-224) repository and then fine-tuned 
-
-### Learn more about Gemma
-
--   The Gemma technical report
-    ([v1](https://ai.google.dev/gemma/technical-report),
-    [v2](http://goo.gle/gemma2report))
-    details the models' capabilities.
--   For tutorials, reference implementations in other ML frameworks, and more,
-    visit https://ai.google.dev/gemma.
+This repository contains an inference implementation written in [PyTorch](https://pytorch.org). The weights are used from HuggingFace's [PaliGemma-3b-pt-224](https://huggingface.co/google/paligemma-3b-pt-224) repository and then fine-tuned using [LoRA](https://arxiv.org/pdf/2106.09685) on the [VQA2](https://visualqa.org) dataset
 
 ## Quick start
 
 ### Installation
 
-1.  To install Gemma you need to use Python 3.10 or higher.
+1.  To install VLM-o you need to use Python 3.10 or higher.
 
-2.  Install JAX for CPU, GPU or TPU. Follow instructions at
-    [the JAX website](https://jax.readthedocs.io/en/latest/installation.html).
-
-3.  Run
-
+2.  Clone the repository using:
 ```
-python -m venv gemma-demo
-. gemma-demo/bin/activate
-pip install git+https://github.com/google-deepmind/gemma.git
+https://github.com/vpareek2/vlm-o
 ```
 
-### Downloading the models
+#### Downloading the model
+3. To run inference on this implementation, you need to download the weights from huggingface at https://huggingface.co/google/paligemma-3b-pt-224. I am probably going to upload my fine-tuned weights too, I will update this when I do. Once you are on huggingface, and logged into your account, clone the weights into the same VLM-o repository.
 
-The model checkpoints are available through Kaggle at
-http://kaggle.com/models/google/gemma. Select one of the **Flax** model
-variations, click the ⤓ button to download the model archive, then extract the
-contents to a local directory. 
-
-Alternatively, visit the [gemma]([https://huggingface.co/models?other=gemma.cpp](https://huggingface.co/models?other=gemma_jax))
-models on the Hugging Face Hub. To download the model, you can run the following code if you have `huggingface_hub` installed:
+4. Make sure to download all libraries using the requirements.txt file.
 
 ```
-from huggingface_hub import snapshot_download
-
-local_dir = snapshot_download(repo_id="google/gemma-2b-flax")
-snapshot_download(repo_id="google/gemma-2b-flax", local_dir=local_dir)
+pip install -r requirements.txt
 ```
 
-In both cases, the archive contains both the model weights and
-the tokenizer, for example the 2b Flax variation contains:
+5. Adjust any hyperparameters prompt in the run.sh file. Also add whatever test images you want to into the test_images file.
 
+6. Inference the model by running the command:
 ```
-2b/              # Directory containing model weights
-tokenizer.model  # Tokenizer
+./run.sh
 ```
-
-### Running the unit tests
-
-To run the unit tests, install the optional `[test]` dependencies (e.g. using
-`pip install -e .[test]` from the root of the source tree), then:
-
-```
-pytest .
-```
-
-Note that the tests in `sampler_test.py` are skipped by default since no
-tokenizer is distributed with the Gemma sources. To run these tests, download a
-tokenizer following the instructions above, and update the `_VOCAB` constant in
-`sampler_test.py` with the path to `tokenizer.model`.
-
-## Examples
-
-To run the example sampling script, pass the paths to the weights directory and
-tokenizer:
-
-```
-python examples/sampling.py \
-  --path_checkpoint=/path/to/archive/contents/2b/ \
-  --path_tokenizer=/path/to/archive/contents/tokenizer.model
-```
-
-There are also several Colab notebook tutorials:
-
--   [`colabs/sampling_tutorial.ipynb`](https://colab.sandbox.google.com/github/google-deepmind/gemma/blob/main/colabs/sampling_tutorial.ipynb)
-    contains a [Colab](http://colab.google) notebook with a sampling example.
-
--   [`colabs/fine_tuning_tutorial.ipynb`](https://colab.sandbox.google.com/github/google-deepmind/gemma/blob/main/colabs/fine_tuning_tutorial.ipynb)
-    contains a [Colab](http://colab.google) with a basic tutorial on how to fine
-    tune Gemma for a task, such as English to French translation.
-
--   [`colabs/gsm8k_eval.ipynb`](https://colab.sandbox.google.com/github/google-deepmind/gemma/blob/main/colabs/gsm8k_eval.ipynb)
-    is a [Colab](http://colab.google) with a reference GSM8K eval
-    implementation.
-
-To run these notebooks you will need to download a local copy of the weights and
-tokenizer (see above), and update the `ckpt_path` and `vocab_path` variables
-with the corresponding paths.
 
 ## System Requirements
 
-Gemma can run on a CPU, GPU and TPU. For GPU, we recommend a 8GB+ RAM on GPU for
-the 2B checkpoint and 24GB+ RAM on GPU for the 7B checkpoint.
+VLM-o can run using the CPU, GPU, or MPS (Mac Performance Shaders for M-Series chips). I haven't done real benchmarking but based on my tests it can inference in ~ 15 seconds from CPU, ~ 7 seconds from GPU and ~ 10 seconds from MPS, using a M2 Max chip for CPU/MPS and a 3070 for GPU.
 
 ## Contributing
 
-We are open to bug reports, pull requests (PR), and other contributions. Please
-see [CONTRIBUTING.md](CONTRIBUTING.md) for details on PRs.
+I am open to any bug reports or contributions. I know there are a lot of parts that can be improved here, but I don't think I will advance from here as I have a larger project to work on, this was more of a weekend project.
 
-## License
+## Project Notes & Inspiration
+This project was inspired by a youtube video I found [here](https://www.youtube.com/watch?v=vAmKB7iPkWw) by Umar Jamil. I am still new to implementing papers so I decided to work on one which had been done before. You will probably see major differences in our codebases, but for the RotaryEmbeddings and KVCache, I referenced his videos, which explained it very well. I highly recommend the video. 
 
-Copyright 2024 DeepMind Technologies Limited
+A note about this project is due to limited compute (me making this on my laptop and being a college student) I was only able to fine-tune on 10% of the VQA2 dataset. This had some interesting repercussions because the model became very blunt. When you ask a question: What is happening in the picture, answer: race. Or diving. For the two test examples at least. The original weights provide a lot more description but, it is not instruction tuned so you can't ask a question and expect a response. 
 
-This code is licensed under the Apache License, Version 2.0 (the \"License\");
-you may not use this file except in compliance with the License. You may obtain
-a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
+## References
+[PaliGemma Paper](https://arxiv.org/pdf/2407.07726)
+[LoRA Paper](https://arxiv.org/pdf/2106.09685)
+[SigLip Paper](https://arxiv.org/pdf/2303.15343)
+[Attention Paper](https://arxiv.org/pdf/1706.03762)
+[YouTube Video](https://www.youtube.com/watch?v=vAmKB7iPkWw)
 
-Unless required by applicable law or agreed to in writing, software distributed
-under the License is distributed on an AS IS BASIS, WITHOUT WARRANTIES OR
-CONDITIONS OF ANY KIND, either express or implied. See the License for the
-specific language governing permissions and limitations under the License.
-
-## Disclaimer
-
-This is not an official Google product.
