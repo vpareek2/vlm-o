@@ -73,10 +73,10 @@ This project was inspired by a youtube video I found [here](https://www.youtube.
 A note about this project is due to limited compute (me making this on my laptop and being a college student) I was only able to fine-tune on 10% of the VQA2 dataset. This had some interesting repercussions because the model became very blunt. When you ask a question: What is happening in the picture, answer: race. Or diving. For the two test examples at least. The original weights provide a lot more description but, it is not instruction tuned so you can't ask a question and expect a response. 
 
 ## References
-[PaliGemma Paper](https://arxiv.org/pdf/2407.07726)
-[LoRA Paper](https://arxiv.org/pdf/2106.09685)
-[SigLip Paper](https://arxiv.org/pdf/2303.15343)
-[Attention Paper](https://arxiv.org/pdf/1706.03762)
-[Dense Connector Paper](https://arxiv.org/pdf/2405.13800), and [repository](https://github.com/HJYao00/DenseConnector?tab=readme-ov-file)
+[PaliGemma Paper](https://arxiv.org/pdf/2407.07726)<br>
+[LoRA Paper](https://arxiv.org/pdf/2106.09685)<br>
+[SigLip Paper](https://arxiv.org/pdf/2303.15343)<br>
+[Attention Paper](https://arxiv.org/pdf/1706.03762)<br>
+[Dense Connector Paper](https://arxiv.org/pdf/2405.13800), and [repository](https://github.com/HJYao00/DenseConnector?tab=readme-ov-file)<br>
 [YouTube Video](https://www.youtube.com/watch?v=vAmKB7iPkWw)
 
