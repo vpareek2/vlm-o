@@ -30,6 +30,7 @@ pip install -r requirements.txt
 ```
 ./run.sh
 ```
+
 ### Demo and GUI use
 If you prefer to use the model with a graphical user interface, I have designed a gradio app. Originally this was supposed to be added to my personal website, but I didn't really want to pay and couldn't get enough vram at any free tier.
 
@@ -39,13 +40,18 @@ python app.py
 ```
 Then open the local host link in the browser of your choice. It should look like this:
 
+## Model Architecture
+In this repository there are 2 folders with model architectures, model and dc_model. model is the file that contains the vanilla implementation of VLM-o, mainly following the PaliGemma architecture. model_dc contains the implementation with a dense connector used in the MultiModalProjector. By default, this repository and `run.sh` is using the PaliGemma implementation. To run the dense connector implementation, navigate into the run.sh file, and where it says `inference.py` in line 13, change it to `inference_dc.py`. If you would like to do the demo, go into app.py and adjust line 5, `from inference import test_inference` to `from inference_dc import test_inference`.
+
+While the dense connector can provide better accuracy and better responses, there responses vary a lot with hallucinations, or just blank responses. I will write more about this in my blog post which I will link. For a more robust model, with reliable outputs use the vanilla model. 
+
 ## System Requirements
 
 VLM-o can run using the CPU, GPU, or MPS (Mac Performance Shaders for M-Series chips). I haven't done real benchmarking but based on my tests it can inference in ~ 15 seconds from CPU, ~ 7 seconds from GPU and ~ 10 seconds from MPS, using a M2 Max chip for CPU/MPS and a 3070 for GPU.
 
 ## Contributing
 
-I am open to any bug reports or contributions. I know there are a lot of parts that can be improved here, but I don't think I will advance from here as I have a larger project to work on, this was more of a weekend project.
+I am open to any bug reports or contributions. I know there are a lot of parts that can be improved here, but I don't think I will advance from here as I have a larger project to work on, this was more of a weekend project. I haven't done much parameter tuning so that is a big point of improvement
 
 ## Project Notes & Inspiration
 This project was inspired by a youtube video I found [here](https://www.youtube.com/watch?v=vAmKB7iPkWw) by Umar Jamil. I am still new to implementing papers so I decided to work on one which had been done before. You will probably see major differences in our codebases, but for the RotaryEmbeddings and KVCache, I referenced his videos, which explained it very well. I highly recommend the video. 
@@ -57,5 +63,6 @@ A note about this project is due to limited compute (me making this on my laptop
 [LoRA Paper](https://arxiv.org/pdf/2106.09685)
 [SigLip Paper](https://arxiv.org/pdf/2303.15343)
 [Attention Paper](https://arxiv.org/pdf/1706.03762)
+[Dense Connector Paper](https://arxiv.org/pdf/2405.13800), and [repository](https://github.com/HJYao00/DenseConnector?tab=readme-ov-file)
 [YouTube Video](https://www.youtube.com/watch?v=vAmKB7iPkWw)
 
