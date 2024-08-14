@@ -56,4 +56,3 @@ class MultiModalProjector(nn.Module):
     def forward(self, image_features):
         hidden_states = self.linear(image_features)
         return hidden_states
-
