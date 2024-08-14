@@ -46,13 +46,16 @@ pip install -r requirements.txt
 ```
 
 ### Demo and GUI use
-If you prefer to use the model with a graphical user interface, I have designed a gradio app. Originally this was supposed to be added to my personal website, but I didn't really want to pay and couldn't get enough vram at any free tier.
+If you prefer to use the model with a graphical user interface, I have designed a pretty simple gradio app. Originally this was supposed to be added to my personal website, but I didn't really want to pay and couldn't get enough vram at any free tier.
 
 All you have to do is first unzip the weights.zip folder, then run:
 ```
 python app.py
 ```
 Then open the local host link in the browser of your choice. It should look like this:
+
+<img src="assets/demo.png" alt="Demo" width="750"/>
+
 
 ## Model Architecture
 In this repository there are 2 folders with model architectures, model and dc_model. model is the file that contains the vanilla implementation of VLM-o, mainly following the PaliGemma architecture. model_dc contains the implementation with a dense connector used in the MultiModalProjector. By default, this repository and `run.sh` is using the PaliGemma implementation. To run the dense connector implementation, navigate into the run.sh file, and where it says `inference.py` in line 13, change it to `inference_dc.py`. If you would like to do the demo, go into app.py and adjust line 5, `from inference import test_inference` to `from inference_dc import test_inference`.
