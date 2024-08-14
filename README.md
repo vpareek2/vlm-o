@@ -13,7 +13,7 @@ This repository contains an inference implementation written in [PyTorch](https:
 <br>
 <div align="center">
 
-**VLM-o Dense Connector**  
+**VLM-o PaliGemma**  
 
 <img src="assets/PaliGemma_ModelArch.png" alt="Model Architecture" width="750"/>
 </div>
