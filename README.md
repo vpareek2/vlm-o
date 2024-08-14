@@ -1,6 +1,6 @@
 # VLM-o
 
-VLM-o is a 3B parameter multi-modal vision model built for image analysis and object detection. This model is inspired by the [PaliGemma](https://arxiv.org/pdf/2407.07726) architecutre.
+VLM-o is a 3B parameter multi-modal vision model built for image analysis and object detection. This model is inspired by the [PaliGemma](https://arxiv.org/pdf/2407.07726) architecutre. To read more check out my [blog post](https://vpareek2.github.io/blogs/posts_html/blog2.html)
 
 This repository contains an inference implementation written in [PyTorch](https://pytorch.org). The weights are used from HuggingFace's [PaliGemma-3b-pt-224](https://huggingface.co/google/paligemma-3b-pt-224) repository and then fine-tuned using [LoRA](https://arxiv.org/pdf/2106.09685) on the [VQA2](https://visualqa.org) dataset. There are 2 implementations in this repository, one vanilla implementation based on the PaliGemma Architecture, and one where a Dense Connector is introduced in place of the Linear Layer. Look below at [Model Architecture](#model-architecture) for an important note. The two architectures are below.
 
